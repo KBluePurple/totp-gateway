@@ -1,6 +1,5 @@
 # TOTP Gateway
 
-[![CI/CD](https://github.com/your-username/totp-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/totp-gateway/actions/workflows/ci.yml)
 [![Crates.io](https://img.shields.io/crates/v/totp-gateway.svg)](https://crates.io/crates/totp-gateway)
 [![Documentation](https://docs.rs/totp-gateway/badge.svg)](https://docs.rs/totp-gateway)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
