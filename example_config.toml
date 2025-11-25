@@ -1,0 +1,130 @@
+[server]
+# Address to bind the gateway server
+bind_addr = "0.0.0.0:25000"
+
+# Default upstream server (used when no route matches)
+default_upstream = "127.0.0.1:25001"
+
+# Trusted proxy configuration for real IP extraction
+# Format: [(CIDR, Header-Name)]
+
+trusted_proxies = []
+
+# Cloudflared (Cloudflare Tunnel) Example:
+# When using Cloudflare Tunnel, cloudflared typically connects from localhost
+# and provides the real client IP in the CF-Connecting-IP header
+# trusted_proxies = [
+#     ["127.0.0.1/32", "CF-Connecting-IP"],    # IPv4 localhost
+#     ["::1/128", "CF-Connecting-IP"]          # IPv6 localhost
+# ]
+
+# If cloudflared runs on a different machine in your private network:
+# trusted_proxies = [
+#     ["10.0.0.0/8", "CF-Connecting-IP"],
+#     ["172.16.0.0/12", "CF-Connecting-IP"],
+#     ["192.168.0.0/16", "CF-Connecting-IP"]
+# ]
+
+# For other reverse proxies:
+# trusted_proxies = [
+#     ["10.0.0.0/8", "X-Real-IP"],
+#     ["172.16.0.0/12", "X-Forwarded-For"]
+# ]
+
+# TLS (SSL/HTTPS) Configuration
+# Uncomment this section to enable HTTPS.
+# Requires valid fullchain certificate and private key files.
+# [tls]
+# cert_file = "./certs/fullchain.pem"
+# key_file = "./certs/privkey.pem"
+
+# Security settings for failed login attempts
+[security]
+# Enable or disable the IP blacklist feature. Default is true.
+enabled = true
+
+# Maximum number of unique IPs to store in the blacklist. Default is 1000.
+blacklist_size = 1000
+
+# Strategy to use when the blacklist is full.
+# "overwrite" - Remove the oldest IP to make space for the new one. (Default)
+# "block" - Do not add new IPs until old ones are manually removed (or app restarts).
+blacklist_strategy = "overwrite"
+
+# Number of failed login attempts before an IP is blacklisted. Default is 5.
+max_retries = 5
+
+# Duration (in seconds) to track failed login attempts for an IP. Default is 3600 (1 hour).
+ip_limit_duration = 3600
+
+# Duration (in seconds) for which an IP remains blacklisted. Default is 3600 (1 hour).
+ban_duration = 3600
+
+# Duration (in seconds) for which a whitelisted IP remains trusted. Default is 604800 (7 days).
+whitelist_duration = 604800
+
+[auth]
+# TOTP secret (base32 encoded)
+# You can specify the secret in three ways (in order of precedence):
+# 1. Directly in config (totp_secret)
+# 2. From a file (totp_secret_file)
+# 3. From environment variable (totp_secret_env)
+
+# YOU MUST CHANGE THIS TO YOUR OWN SECRET
+totp_secret = "N48FJHFU3YD73H2NN48FJHFU3YD73H2N"
+# totp_secret_file = "./key/secret.txt"
+# totp_secret_env = "TOTP_SECRET"
+
+# Path to a custom login page HTML file.
+# If commented out, a default page is used.
+# login_page_file = "./login_page.html"
+
+# Duration (in seconds) for which a successful login session remains valid. Default is 1800 (30 minutes).
+session_duration = 1800
+
+# Route Configuration
+# Routes are matched in order. First match wins.
+# Both 'host' and 'path' support glob patterns:
+#   - '*' matches zero or more characters
+#   - '?' matches exactly one character
+# URL parameters (query strings) are ignored in matching.
+#
+# New format (host/path with glob patterns):
+[[routes]]
+# Match all subdomains of example.com
+host = "*.example.com"
+upstream_addr = "127.0.0.1:25001"
+
+[[routes]]
+# Match specific path pattern under any example.com subdomain
+host = "*.example.com"
+path = "/test/*"
+upstream_addr = "127.0.0.1:25002"
+
+[[routes]]
+# Match specific host and path
+host = "api.example.com"
+path = "/v1/*"
+upstream_addr = "127.0.0.1:25003"
+
+[[routes]]
+# Match only by path (any host)
+path = "/admin/*"
+upstream_addr = "127.0.0.1:25004"
+
+[[routes]]
+# Match only by host (any path)
+host = "legacy.example.com"
+upstream_addr = "127.0.0.1:25005"
+
+[[routes]]
+# Exact match example
+host = "exact.example.com"
+path = "/api/endpoint"
+upstream_addr = "127.0.0.1:25006"
+
+[[routes]]
+# You can mix path_prefix with host if needed
+host = "old.example.com"
+path_prefix = "/api"
+upstream_addr = "127.0.0.1:25008"

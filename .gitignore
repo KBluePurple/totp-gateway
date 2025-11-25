@@ -1,0 +1,91 @@
+# Rust build artifacts
+/target
+**/*.rs.bk
+*.pdb
+
+# Test temporary files
+/target/tmp/
+
+# Cargo lock for libraries (keep for applications)
+# Cargo.lock
+
+# Test artifacts
+*.profraw
+*.profdata
+
+# Configuration files (contain secrets)
+config.toml
+secret.txt
+*.key
+*.pem
+*.crt
+
+# Keep example configs
+!example_config.toml
+
+# Test configuration files (now in target/tmp)
+# test_config_*.toml
+# adv_test_config_*.toml
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Log files
+*.log
+logs/
+
+# Coverage reports
+cobertura.xml
+tarpaulin-report.html
+*.gcda
+*.gcno
+
+# Flamegraph output
+flamegraph.svg
+perf.data
+perf.data.old
+
+# Benchmark results
+criterion/
+
+# Documentation build
+/doc
+
+# Local development
+.env
+.env.local
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# Backup files
+*.bak
+*.tmp
+*.temp
+
+# Lock files (keep Cargo.lock but exclude others)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Release artifacts (local builds)
+*.tar.gz
+*.zip
+dist/
+release/
