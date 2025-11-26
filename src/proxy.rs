@@ -1,6 +1,6 @@
 use crate::config::BlacklistStrategy;
 use crate::state::{
-    DEFAULT_HTTP_PORT, MAX_BODY_SIZE, MAX_IP_ENTRIES, MAX_SESSION_ENTRIES, ProxyState, TOTP_DIGITS,
+    ProxyState, DEFAULT_HTTP_PORT, MAX_BODY_SIZE, MAX_IP_ENTRIES, MAX_SESSION_ENTRIES, TOTP_DIGITS,
     TOTP_SKEW, TOTP_STEP_SECS,
 };
 use crate::utils::{ProxyError, SessionId, UpstreamAddr};
@@ -12,8 +12,8 @@ use pingora::prelude::*;
 use std::net::IpAddr;
 use std::ops::Deref;
 use std::str::FromStr;
-use std::sync::Arc;
 use std::sync::atomic::Ordering;
+use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 use totp_rs::{Algorithm, Secret, TOTP};
 use url::form_urlencoded;
@@ -346,6 +346,14 @@ impl ProxyHttp for AuthGateway {
         header.insert_header("X-Content-Type-Options", "nosniff")?;
         header.insert_header("X-Frame-Options", "DENY")?;
 
+        header.insert_header(
+            "Cache-Control",
+            "no-store, no-cache, must-revalidate, private",
+        )?;
+        header.insert_header("Pragma", "no-cache")?;
+        header.insert_header("Expires", "0")?;
+        header.insert_header("CDN-Cache-Control", "no-store")?;
+
         session
             .write_response_header(Box::new(header), false)
             .await?;
@@ -357,5 +365,30 @@ impl ProxyHttp for AuthGateway {
             .await?;
 
         Ok(true)
+    }
+
+    async fn response_filter(
+        &self,
+        _session: &mut Session,
+        upstream_response: &mut ResponseHeader,
+        _ctx: &mut Self::CTX,
+    ) -> Result<()> {
+        upstream_response
+            .insert_header(
+                "Cache-Control",
+                "no-store, no-cache, must-revalidate, private",
+            )
+            .ok();
+        upstream_response.insert_header("Pragma", "no-cache").ok();
+        upstream_response.insert_header("Expires", "0").ok();
+
+        upstream_response
+            .insert_header("CDN-Cache-Control", "no-store")
+            .ok();
+        upstream_response
+            .insert_header("Cloudflare-CDN-Cache-Control", "no-store")
+            .ok();
+
+        Ok(())
     }
 }
