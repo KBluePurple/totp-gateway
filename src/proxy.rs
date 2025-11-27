@@ -393,25 +393,45 @@ impl ProxyHttp for AuthGateway {
 
     async fn response_filter(
         &self,
-        _session: &mut Session,
+        session: &mut Session,
         upstream_response: &mut ResponseHeader,
         _ctx: &mut Self::CTX,
     ) -> Result<()> {
-        upstream_response
-            .insert_header(
-                "Cache-Control",
-                "no-store, no-cache, must-revalidate, private",
-            )
-            .ok();
-        upstream_response.insert_header("Pragma", "no-cache").ok();
-        upstream_response.insert_header("Expires", "0").ok();
+        let runtime = self.state.runtime.load();
 
-        upstream_response
-            .insert_header("CDN-Cache-Control", "no-store")
-            .ok();
-        upstream_response
-            .insert_header("Cloudflare-CDN-Cache-Control", "no-store")
-            .ok();
+        let host_hdr = session
+            .req_header()
+            .headers
+            .get("Host")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("");
+        let host_only = host_hdr.split(':').next().unwrap_or(host_hdr);
+        let path = session.req_header().uri.path();
+
+        let matched_route = runtime
+            .routes
+            .iter()
+            .find(|r| Self::check_route(host_only, path, &r));
+
+        let is_unprotected = matched_route.map(|r| !r.protect).unwrap_or(false);
+
+        if !is_unprotected {
+            upstream_response
+                .insert_header(
+                    "Cache-Control",
+                    "no-store, no-cache, must-revalidate, private",
+                )
+                .ok();
+            upstream_response.insert_header("Pragma", "no-cache").ok();
+            upstream_response.insert_header("Expires", "0").ok();
+
+            upstream_response
+                .insert_header("CDN-Cache-Control", "no-store")
+                .ok();
+            upstream_response
+                .insert_header("Cloudflare-CDN-Cache-Control", "no-store")
+                .ok();
+        }
 
         Ok(())
     }
