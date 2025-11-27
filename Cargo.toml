@@ -1,6 +1,6 @@
 [package]
 name = "totp-gateway"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 authors = ["Ore U <me@nyc.ac>"]
 description = "A high-performance TOTP-based authentication gateway built on Cloudflare's Pingora framework for securing private network access"
