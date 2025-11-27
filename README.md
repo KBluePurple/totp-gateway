@@ -18,12 +18,20 @@ It adds a **Two-Factor Authentication (TOTP)** layer in front of your internal a
     *   IP Blacklisting & Automatic Blocking (Brute-force protection).
     *   Configurable login attempts and ban duration.
     *   Session expiration control.
-*   **🌐 Flexible Routing**: Supports Glob pattern matching for Hostnames (Subdomains) and Paths.
+*   **🌐 Flexible Routing**: Supports Glob pattern matching for Hostnames (Subdomains) and Paths, plus per‑route protection toggle via `protect`.
 *   **🔐 SSL/HTTPS Support**: Easily enable TLS via configuration.
 *   **🔄 Hot Reload**: Apply configuration changes (`config.toml`) instantly without downtime.
 *   **🎨 Custom Login Page**: Fully customizable HTML login interface.
 
 ![Login Page](./assets/login_page_screenshot.png)
+
+## 🆕 Changelog
+
+### v 0.1.3
+- Feature: Per‑route `protect` option to choose whether a route is secured by the gateway or proxied directly. Defaults to `true` for full backward compatibility. See the updated examples above and `example_config.toml`.
+
+### v 0.1.2
+- Fix: Make don't cache any pages by default. (Issued when use with Cloudflare Tunnel)
 
 ## 📦 Installation
 
@@ -127,23 +135,39 @@ key_file = "./certs/privkey.pem"    # Path to private key
 
 Define multiple routes. Matched in order from top to bottom.
 
+- Matching fields:
+  - `host`: glob pattern for hostname (e.g., `*.example.com`)
+  - `path`: glob pattern for path (e.g., `/admin/*`)
+  - `path_prefix`: simple prefix match for path (checked before host/path globs)
+- Upstream target:
+  - `upstream_addr`: target `host:port`
+- Protection control:
+  - `protect` (bool, default `true`): when `false`, the route bypasses authentication, sessions, blacklist, etc.
+
 ```toml
-# 1. Route specific path to a different port
+# 1. Route specific path to a different port (protected by default)
 [[routes]]
 path_prefix = "/admin"
 upstream_addr = "127.0.0.1:9090"
+protect = true
 
-# 2. Subdomain matching
+# 2. Subdomain matching (unprotected example)
 [[routes]]
 host = "api.example.com"
 upstream_addr = "127.0.0.1:3000"
+protect = false  # bypass login and security for this route
 
 # 3. Wildcard support
 [[routes]]
 host = "*.internal.com"
 path = "/legacy/*"
 upstream_addr = "127.0.0.1:4000"
+protect = true
 ```
+
+Tip:
+- If no route matches, traffic goes to `server.default_upstream` and remains protected (equivalent to `protect = true`).
+- If you need a public endpoint, define an explicit route with `protect = false`.
 
 ## 🛡️ How It Works
 
@@ -155,6 +179,40 @@ upstream_addr = "127.0.0.1:4000"
     *   **Success**: A session cookie is issued, and the request is proxied to the upstream server.
     *   **Failure**: Failure count increments. If it exceeds the limit, the IP is **Banned** temporarily.
 4.  **Valid Session**: Request is immediately proxied to the upstream server.
+5.  **Unprotected Route (`protect=false`)**: The gateway skips authentication and blacklist checks and proxies the request directly.
+
+### Security Notes
+
+- The fallback route (when no `[[routes]]` matches) is always protected. To expose a public endpoint, create a specific route and set `protect = false`.
+- Be careful not to create a `protect = false` route that matches `/auth` unintentionally; doing so would proxy the login endpoint to your upstream instead of handling authentication.
+- Blacklist and rate limiting do not apply to `protect = false` routes.
+
+### Migration
+
+- The `protect` field is optional and defaults to `true`. Existing configs without `protect` continue to work unchanged.
+
+### Example: Mixed protected/unprotected
+
+```toml
+[server]
+bind_addr = "0.0.0.0:25000"
+default_upstream = "127.0.0.1:8080"
+
+[auth]
+totp_secret = "JBSWY3DPEHPK3PXP"
+
+[[routes]]
+# Public healthcheck endpoint
+path = "/health"
+upstream_addr = "127.0.0.1:8080"
+protect = false
+
+[[routes]]
+# Protected admin area
+path = "/admin/*"
+upstream_addr = "127.0.0.1:9090"
+protect = true
+```
 
 ## 📊 Performance
 
@@ -185,6 +243,7 @@ The test suite includes:
 - Security feature tests (rate limiting, IP banning)
 - Session management tests
 - Concurrent request handling tests
+- Route protection tests (`protect = true/false`) validating bypass and enforcement behavior
 
 ## 🤝 Contributing
 
