@@ -3,7 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/totp-gateway.svg)](https://crates.io/crates/totp-gateway)
 [![Documentation](https://docs.rs/totp-gateway/badge.svg)](https://docs.rs/totp-gateway)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-1.84%2B-orange)](https://www.rust-lang.org)
+[![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)](https://www.rust-lang.org)
 [![Powered By](https://img.shields.io/badge/powered%20by-Pingora-F38020)](https://github.com/cloudflare/pingora)
 
 **TOTP Gateway** is a lightweight, high-performance reverse proxy authentication gateway built on Cloudflare's [Pingora](https://github.com/cloudflare/pingora) framework.
