@@ -27,6 +27,9 @@ It adds a **Two-Factor Authentication (TOTP)** layer in front of your internal a
 
 ## 🆕 Changelog
 
+### v 0.1.5
+- Fix: Change wrong response settings.
+
 ### v 0.1.4
 - Change: Make can cache non-protected routes by default.
 
