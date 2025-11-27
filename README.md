@@ -27,6 +27,9 @@ It adds a **Two-Factor Authentication (TOTP)** layer in front of your internal a
 
 ## 🆕 Changelog
 
+### v 0.1.4
+- Change: Make can cache non-protected routes by default.
+
 ### v 0.1.3
 - Feature: Per‑route `protect` option to choose whether a route is secured by the gateway or proxied directly. Defaults to `true` for full backward compatibility. See the updated examples above and `example_config.toml`.
 
