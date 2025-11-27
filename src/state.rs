@@ -24,6 +24,7 @@ pub struct CompiledRoute {
     pub path: Option<Regex>,
     pub path_prefix: Option<String>,
     pub upstream_addr: String,
+    pub protect: bool,
 }
 
 pub struct RuntimeState {

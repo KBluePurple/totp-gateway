@@ -1,7 +1,7 @@
 use crate::config::BlacklistStrategy;
 use crate::state::{
-    ProxyState, DEFAULT_HTTP_PORT, MAX_BODY_SIZE, MAX_IP_ENTRIES, MAX_SESSION_ENTRIES, TOTP_DIGITS,
-    TOTP_SKEW, TOTP_STEP_SECS,
+    CompiledRoute, ProxyState, DEFAULT_HTTP_PORT, MAX_BODY_SIZE, MAX_IP_ENTRIES,
+    MAX_SESSION_ENTRIES, TOTP_DIGITS, TOTP_SKEW, TOTP_STEP_SECS,
 };
 use crate::utils::{ProxyError, SessionId, UpstreamAddr};
 use async_trait::async_trait;
@@ -166,6 +166,17 @@ impl AuthGateway {
         addr.parse()
             .unwrap_or_else(|_| UpstreamAddr::new("127.0.0.1".to_string(), DEFAULT_HTTP_PORT))
     }
+
+    fn check_route(host: &str, path: &str, r: &&&CompiledRoute) -> bool {
+        if let Some(prefix) = &r.path_prefix {
+            return path.starts_with(prefix);
+        }
+
+        let host_match = r.host.as_ref().map(|re| re.is_match(host)).unwrap_or(true);
+        let path_match = r.path.as_ref().map(|re| re.is_match(path)).unwrap_or(true);
+
+        host_match && path_match
+    }
 }
 
 #[async_trait]
@@ -194,15 +205,7 @@ impl ProxyHttp for AuthGateway {
         let upstream_addr = runtime
             .routes
             .iter()
-            .find(|r| {
-                if let Some(prefix) = &r.path_prefix {
-                    return path.starts_with(prefix);
-                }
-
-                let host_match = r.host.as_ref().map(|re| re.is_match(host)).unwrap_or(true);
-                let path_match = r.path.as_ref().map(|re| re.is_match(path)).unwrap_or(true);
-                host_match && path_match
-            })
+            .find(|r| Self::check_route(host, path, &r))
             .map(|r| &r.upstream_addr)
             .unwrap_or(&runtime.config.server.default_upstream);
 
@@ -216,6 +219,27 @@ impl ProxyHttp for AuthGateway {
     }
 
     async fn request_filter(&self, session: &mut Session, _ctx: &mut Self::CTX) -> Result<bool> {
+        let runtime_for_route = self.state.runtime.load();
+        let host_hdr = session
+            .req_header()
+            .headers
+            .get("Host")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("");
+        let host_only = host_hdr.split(':').next().unwrap_or(host_hdr);
+        let path = session.req_header().uri.path();
+
+        let matched_route = runtime_for_route
+            .routes
+            .iter()
+            .find(|r| Self::check_route(host_only, path, &r));
+
+        if let Some(route) = matched_route {
+            if !route.protect {
+                return Ok(false);
+            }
+        }
+
         let client_ip = match self.get_real_ip(session) {
             Some(ip) => ip,
             None => {

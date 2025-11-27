@@ -50,10 +50,6 @@ pub struct AuthConfig {
     pub session_duration: u64,
 }
 
-fn default_session_duration() -> u64 {
-    1800
-}
-
 impl Default for AuthConfig {
     fn default() -> Self {
         let secret = Secret::generate_secret();
@@ -93,6 +89,10 @@ pub struct SecurityConfig {
     pub whitelist_duration: u64,
 }
 
+fn default_session_duration() -> u64 {
+    1800
+}
+
 fn default_security_enabled() -> bool {
     true
 }
@@ -119,6 +119,10 @@ fn default_ban_duration() -> u64 {
 
 fn default_whitelist_duration() -> u64 {
     604800
+}
+
+fn default_route_protect() -> bool {
+    true
 }
 
 impl Default for SecurityConfig {
@@ -170,6 +174,8 @@ pub struct RouteConfig {
     #[serde(default)]
     pub path_prefix: Option<String>,
     pub upstream_addr: String,
+    #[serde(default = "default_route_protect")]
+    pub protect: bool,
 }
 
 pub fn load_config<P: AsRef<Path>>(path: P) -> Result<Config, Box<dyn std::error::Error>> {

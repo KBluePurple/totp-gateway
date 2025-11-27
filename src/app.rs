@@ -75,6 +75,7 @@ impl App {
                     path,
                     path_prefix: r.path_prefix.clone(),
                     upstream_addr: r.upstream_addr.clone(),
+                    protect: r.protect,
                 }
             })
             .collect();

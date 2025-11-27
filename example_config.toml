@@ -89,42 +89,53 @@ session_duration = 1800
 #   - '?' matches exactly one character
 # URL parameters (query strings) are ignored in matching.
 #
+# Each route can set `protect`:
+#   - true  (default): Apply gateway protection (session/TOTP, blacklist, etc.)
+#   - false: Bypass protection and just proxy to upstream
+#
 # New format (host/path with glob patterns):
 [[routes]]
 # Match all subdomains of example.com
 host = "*.example.com"
 upstream_addr = "127.0.0.1:25001"
+protect = true
 
 [[routes]]
 # Match specific path pattern under any example.com subdomain
 host = "*.example.com"
 path = "/test/*"
 upstream_addr = "127.0.0.1:25002"
+protect = false  # This route bypasses authentication/security
 
 [[routes]]
 # Match specific host and path
 host = "api.example.com"
 path = "/v1/*"
 upstream_addr = "127.0.0.1:25003"
+protect = true
 
 [[routes]]
 # Match only by path (any host)
 path = "/admin/*"
 upstream_addr = "127.0.0.1:25004"
+protect = true
 
 [[routes]]
 # Match only by host (any path)
 host = "legacy.example.com"
 upstream_addr = "127.0.0.1:25005"
+protect = false
 
 [[routes]]
 # Exact match example
 host = "exact.example.com"
 path = "/api/endpoint"
 upstream_addr = "127.0.0.1:25006"
+protect = true
 
 [[routes]]
 # You can mix path_prefix with host if needed
 host = "old.example.com"
 path_prefix = "/api"
 upstream_addr = "127.0.0.1:25008"
+protect = true
