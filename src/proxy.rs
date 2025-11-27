@@ -1,7 +1,7 @@
 use crate::config::BlacklistStrategy;
 use crate::state::{
-    CompiledRoute, ProxyState, DEFAULT_HTTP_PORT, MAX_BODY_SIZE, MAX_IP_ENTRIES,
-    MAX_SESSION_ENTRIES, TOTP_DIGITS, TOTP_SKEW, TOTP_STEP_SECS,
+    CompiledRoute, DEFAULT_HTTP_PORT, MAX_BODY_SIZE, MAX_IP_ENTRIES, MAX_SESSION_ENTRIES,
+    ProxyState, TOTP_DIGITS, TOTP_SKEW, TOTP_STEP_SECS,
 };
 use crate::utils::{ProxyError, SessionId, UpstreamAddr};
 use async_trait::async_trait;
@@ -12,8 +12,8 @@ use pingora::prelude::*;
 use std::net::IpAddr;
 use std::ops::Deref;
 use std::str::FromStr;
-use std::sync::atomic::Ordering;
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 use std::time::{SystemTime, UNIX_EPOCH};
 use totp_rs::{Algorithm, Secret, TOTP};
 use url::form_urlencoded;
@@ -243,7 +243,7 @@ impl ProxyHttp for AuthGateway {
         let client_ip = match self.get_real_ip(session) {
             Some(ip) => ip,
             None => {
-                let mut header = ResponseHeader::build(400, Some(2))?;
+                let mut header = ResponseHeader::build(400, Some(1))?;
                 header.insert_header("Content-Length", "0")?;
                 session
                     .write_response_header(Box::new(header), false)
@@ -257,7 +257,7 @@ impl ProxyHttp for AuthGateway {
 
         if self.is_blacklisted(client_ip) {
             warn!("Blocked Request from {}", client_ip);
-            let mut header = ResponseHeader::build(429, Some(2))?;
+            let mut header = ResponseHeader::build(429, Some(1))?;
             header.insert_header("Content-Length", "0")?;
             session
                 .write_response_header(Box::new(header), false)
@@ -280,7 +280,9 @@ impl ProxyHttp for AuthGateway {
 
             if content_len > MAX_BODY_SIZE {
                 warn!("Payload too large: {} bytes", content_len);
-                let header = ResponseHeader::build(413, Some(2))?;
+                let mut header = ResponseHeader::build(413, Some(1))?;
+                header.insert_header("Content-Length", "0")?;
+
                 session
                     .write_response_header(Box::new(header), true)
                     .await?;
@@ -290,7 +292,9 @@ impl ProxyHttp for AuthGateway {
             let body_bytes = session.read_request_body().await?.unwrap_or_default();
 
             if body_bytes.len() > MAX_BODY_SIZE {
-                let header = ResponseHeader::build(413, Some(2))?;
+                let mut header = ResponseHeader::build(413, Some(1))?;
+                header.insert_header("Content-Length", "0")?;
+
                 session
                     .write_response_header(Box::new(header), true)
                     .await?;
@@ -304,12 +308,12 @@ impl ProxyHttp for AuthGateway {
                 match self.verify_totp(code) {
                     Ok(true) => {
                         self.reset_failure(client_ip);
-                        self.state.whitelist.insert(client_ip, ());
 
                         if self.state.sessions.entry_count() >= MAX_SESSION_ENTRIES {
                             warn!("Session Table Full. Rejecting login.");
                             let mut header = ResponseHeader::build(503, Some(2))?;
                             header.insert_header("Retry-After", "60")?;
+                            header.insert_header("Content-Length", "0")?;
                             session
                                 .write_response_header(Box::new(header), true)
                                 .await?;
@@ -325,7 +329,7 @@ impl ProxyHttp for AuthGateway {
                             "SID={}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age={}",
                             new_sid, auth_config.session_duration
                         );
-                        let mut header = ResponseHeader::build(302, Some(2))?;
+                        let mut header = ResponseHeader::build(302, Some(3))?;
                         header.insert_header("Set-Cookie", cookie_val)?;
                         header.insert_header("Location", "/")?;
                         header.insert_header("Content-Length", "0")?;
@@ -340,10 +344,10 @@ impl ProxyHttp for AuthGateway {
                         self.register_failure(client_ip);
 
                         if self.is_blacklisted(client_ip) {
-                            let mut header = ResponseHeader::build(429, Some(2))?;
+                            let mut header = ResponseHeader::build(429, Some(1))?;
                             header.insert_header("Content-Length", "0")?;
                             session
-                                .write_response_header(Box::new(header), false)
+                                .write_response_header(Box::new(header), true)
                                 .await?;
                             return Ok(true);
                         }
@@ -364,7 +368,7 @@ impl ProxyHttp for AuthGateway {
             return Ok(true);
         }
 
-        let mut header = ResponseHeader::build(200, Some(2))?;
+        let mut header = ResponseHeader::build(200, Some(8))?;
         header.insert_header("Content-Type", "text/html; charset=utf-8")?;
         header.insert_header("Content-Length", runtime.login_page_len.as_str())?;
         header.insert_header("X-Content-Type-Options", "nosniff")?;
