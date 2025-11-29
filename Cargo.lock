@@ -19,17 +19,6 @@ checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
 name = "ahash"
-version = "0.7.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "891477e0c6a8957309ee5c45a6368af3ae14bb510732d2684ffa19af310920f9"
-dependencies = [
- "getrandom 0.2.16",
- "once_cell",
- "version_check",
-]
-
-[[package]]
-name = "ahash"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a15f179cd60c4584b8a8c596927aadc462e27f2ca70c04e0071964a73ba7a75"
@@ -265,6 +254,17 @@ checksum = "4e2e4afe60d7dd600fdd3de8d0f08c2b7ec039712e3b6137ff98b7004e82de4f"
 dependencies = [
  "alloc-no-stdlib",
  "alloc-stdlib",
+]
+
+[[package]]
+name = "bstr"
+version = "1.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63044e1ae8e69f3b5a92c736ca6269b8d12fa7efe39bf34ddb06d102cf0e2cab"
+dependencies = [
+ "memchr",
+ "regex-automata",
+ "serde",
 ]
 
 [[package]]
@@ -696,6 +696,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "foldhash"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
+
+[[package]]
 name = "foreign-types"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -880,9 +886,6 @@ name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
-dependencies = [
- "ahash 0.7.8",
-]
 
 [[package]]
 name = "hashbrown"
@@ -892,7 +895,7 @@ checksum = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1"
 dependencies = [
  "allocator-api2",
  "equivalent",
- "foldhash",
+ "foldhash 0.1.5",
 ]
 
 [[package]]
@@ -900,6 +903,11 @@ name = "hashbrown"
 version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
+dependencies = [
+ "allocator-api2",
+ "equivalent",
+ "foldhash 0.2.0",
+]
 
 [[package]]
 name = "heck"
@@ -1665,8 +1673,7 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 [[package]]
 name = "pingora"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a1f02a6347e81953ab831fdcf090a028db12d67ec3badf47831d1299dac6e20"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
  "pingora-core",
  "pingora-http",
@@ -1677,12 +1684,12 @@ dependencies = [
 [[package]]
 name = "pingora-cache"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ef622051fbb2cb98a524df3a8112f02d0919ccda600a44d705ec550f1a28fe2"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
- "ahash 0.8.12",
+ "ahash",
  "async-trait",
  "blake2",
+ "bstr",
  "bytes",
  "cf-rustracing",
  "cf-rustracing-jaeger",
@@ -1713,12 +1720,12 @@ dependencies = [
 [[package]]
 name = "pingora-core"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76f63d3f67d99c95a1f85623fc43242fd644dd12ccbaa18c38a54e1580c6846a"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
- "ahash 0.8.12",
+ "ahash",
  "async-trait",
  "brotli",
+ "bstr",
  "bytes",
  "chrono",
  "clap 3.2.25",
@@ -1752,6 +1759,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "tokio",
+ "tokio-stream",
  "tokio-test",
  "unicase",
  "windows-sys 0.59.0",
@@ -1761,14 +1769,12 @@ dependencies = [
 [[package]]
 name = "pingora-error"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52119570d3f4644e09654ad24df2b7d851bf12eaa8c4148b4674c7f90916598e"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 
 [[package]]
 name = "pingora-header-serde"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "252a16def05c7adbbdda776e87b2be36e9481c8a77249207a2f3b563e8933b35"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
  "bytes",
  "http",
@@ -1783,8 +1789,7 @@ dependencies = [
 [[package]]
 name = "pingora-http"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a3542fd0fd0a83212882c5066ae739ba51804f20d624ff7e12ec85113c5c89a"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
  "bytes",
  "http",
@@ -1794,11 +1799,10 @@ dependencies = [
 [[package]]
 name = "pingora-lru"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba89e4400cb978f0d7be1c14bd7ab4168c8e2c00d97ff19f964fc0048780237c"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
  "arrayvec",
- "hashbrown 0.12.3",
+ "hashbrown 0.16.1",
  "parking_lot",
  "rand 0.8.5",
 ]
@@ -1806,8 +1810,7 @@ dependencies = [
 [[package]]
 name = "pingora-pool"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "996c574f30a6e1ad10b47ac1626a86e0e47d5075953dd049d60df16ba5f7076e"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
  "crossbeam-queue",
  "log",
@@ -1821,8 +1824,7 @@ dependencies = [
 [[package]]
 name = "pingora-proxy"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c4097fd2639905bf5b81f3618551cd826d5e03aac063e17fd7a4137f19c1a5b"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
  "async-trait",
  "bytes",
@@ -1844,8 +1846,7 @@ dependencies = [
 [[package]]
 name = "pingora-runtime"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ccc165021cf55a39b9e760121b22c4260b17a0b2c530d5b93092fc5bc765b94"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
  "once_cell",
  "rand 0.8.5",
@@ -1856,8 +1857,7 @@ dependencies = [
 [[package]]
 name = "pingora-timeout"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "548cd21d41611c725827677937e68f2cd008bbfa09f3416d3fbad07e1e42f6d7"
+source = "git+https://github.com/KBluePurple/pingora#9faa813af8f7c0ede63b8d69936b2640cf2158fb"
 dependencies = [
  "once_cell",
  "parking_lot",
@@ -2828,7 +2828,7 @@ checksum = "df8b2b54733674ad286d16267dcfc7a71ed5c776e4ac7aa3c3e2561f7c637bf2"
 
 [[package]]
 name = "totp-gateway"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "arc-swap",
  "async-trait",

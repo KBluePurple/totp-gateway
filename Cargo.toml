@@ -1,6 +1,6 @@
 [package]
 name = "totp-gateway"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2024"
 authors = ["Ore U <me@nyc.ac>"]
 description = "A high-performance TOTP-based authentication reverse proxy gateway built on Cloudflare's Pingora framework for securing private network access"
@@ -21,7 +21,7 @@ exclude = [
 rust-version = "1.85"
 
 [dependencies]
-pingora = { version = "0.6.0", features = ["proxy"] }
+pingora = { git = "https://github.com/KBluePurple/pingora", features = ["proxy"] }
 async-trait = "0.1"
 uuid = { version = "1.18.1", features = ["v4", "fast-rng"] }
 totp-rs = { version = "5.6", features = ["gen_secret"] }
@@ -45,3 +45,10 @@ reqwest = { version = "0.12", features = ["json", "cookies"] }
 [[bin]]
 name = "totp-gateway"
 path = "src/main.rs"
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true
+panic = "abort"
+opt-level = 3
