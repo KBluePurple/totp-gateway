@@ -33,6 +33,7 @@ configuration file, without setting up complex authentication infrastructure.
 
 ### v 0.1.6
 
+- **Note**: This version is not published to crates.io until [Pingora PR #425](https://github.com/cloudflare/pingora/pull/425) is merged.
 - Fix: On Windows, the program graceful shutdown immediately after startup.
 - Feature: Add `mimalloc` for faster, stabile memory allocation.
 
@@ -55,7 +56,12 @@ configuration file, without setting up complex authentication infrastructure.
 
 ## 📦 Installation
 
-### Option 1: Install from crates.io (Recommended)
+> [!IMPORTANT]
+> Starting from **v0.1.6**, this crate will **not be published to crates.io** until the upstream [Pingora PR #425](https://github.com/cloudflare/pingora/pull/425) (which has been pending for over a year) is merged.
+>
+> **Reason**: To fix the immediate shutdown issue on Windows, i am currently using a forked version of Pingora. Since `crates.io` does not support dependencies specified via Git URLs (only version numbers), we cannot publish this version. Please use the **Build from Source** option below.
+
+### Option 1: Install from crates.io (Recommended for v0.1.5 and below)
 
 ```bash
 cargo install totp-gateway
