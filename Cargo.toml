@@ -38,6 +38,7 @@ notify = "8.2.0"
 arc-swap = "1.7"
 regex = "1.12.2"
 url = "2.5.7"
+mimalloc = "0.1"
 
 [dev-dependencies]
 reqwest = { version = "0.12", features = ["json", "cookies"] }

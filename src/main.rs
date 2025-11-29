@@ -1,6 +1,11 @@
 use clap::Parser;
 use totp_gateway::App;
 
+use mimalloc::MiMalloc;
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
