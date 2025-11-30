@@ -31,6 +31,10 @@ configuration file, without setting up complex authentication infrastructure.
 
 ## 🆕 Changelog
 
+### v 0.1.7
+
+- Fix: Fix tokio runtime bug.
+
 ### v 0.1.6
 
 - **Note**: This version is not published to crates.io until [Pingora PR #425](https://github.com/cloudflare/pingora/pull/425) is merged.
